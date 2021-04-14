@@ -1,4 +1,4 @@
-package creational
+package creational.builder
 
 class Dialog private constructor(
         private val _title: String?,
