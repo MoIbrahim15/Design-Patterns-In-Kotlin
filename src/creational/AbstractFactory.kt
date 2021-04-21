@@ -1,70 +1,101 @@
 package creational
 
+//The Abstract Factory Pattern provides an interface for creating families of related
+//or dependent objects without specifying their concrete classes.
+//when you have many of objects that can be added or, changed dynamically during runtime
+
 sealed class CarType(val value: String) {
-    object MINI : CarType("MINI")
-    object LUXURY : CarType("LUXURY")
+    object MANUAL : CarType("MANUAL")
+    object AUTOMATIC : CarType("AUTOMATIC")
 }
 
-sealed class MadeInCountry(val value: String) {
-    object EGYPT : MadeInCountry("EGYPT")
-    object USA : MadeInCountry("USA")
+sealed class TrainType(val value: String) {
+    object GAS : TrainType("GAS")
+    object ELECTRIC : TrainType("ELECTRIC")
 }
 
-interface Car {
-    fun madeInCountry(): MadeInCountry
-    fun carType(): CarType
+sealed class Country(val value: String) {
+    object EGYPT : Country("EGYPT")
+    object USA : Country("USA")
 }
 
-class MiniCar(private val country: MadeInCountry) : Car {
-    override fun madeInCountry(): MadeInCountry {
-        return country
-    }
-
-    override fun carType(): CarType {
-        return CarType.MINI
+abstract class Car(var country: Country, var carType: CarType) {
+    fun build() {
+        println("Made in:${country.value} Type:${carType.value}")
     }
 }
 
-class LuxuryCar(private val country: MadeInCountry) : Car {
-    override fun madeInCountry(): MadeInCountry {
-        return country
-    }
+class ManualCar(country: Country) : Car(country, CarType.MANUAL)
 
-    override fun carType(): CarType {
-        return CarType.LUXURY
+class AutomaticCar(country: Country) : Car(country, CarType.AUTOMATIC)
+
+abstract class Train(var country: Country, var trainType: TrainType) {
+    fun build() {
+        println("Made in:${country.value} Type:${trainType.value}")
     }
 }
 
-class EgyptCarFactory {
-    fun buildCar(carType: CarType): Car {
+class GasTrain(country: Country) : Train(country, TrainType.GAS)
+
+class ElectricTrain(country: Country) : Train(country, TrainType.ELECTRIC)
+
+interface Factory {
+    fun buildCar(carType: CarType): Car
+    fun buildTrain(trainType: TrainType): Train
+}
+
+class EgyptFactory : Factory {
+
+    override fun buildCar(carType: CarType): Car {
         return when (carType) {
-            CarType.MINI -> MiniCar(MadeInCountry.EGYPT)
-            CarType.LUXURY -> LuxuryCar(MadeInCountry.EGYPT)
+            CarType.MANUAL -> ManualCar(Country.EGYPT)
+            CarType.AUTOMATIC -> AutomaticCar(Country.EGYPT)
+        }
+    }
+
+    override fun buildTrain(trainType: TrainType): Train {
+        return when (trainType) {
+            TrainType.GAS -> GasTrain(Country.EGYPT)
+            TrainType.ELECTRIC -> ElectricTrain(Country.EGYPT)
         }
     }
 }
 
-class USACarFactory {
-    fun buildCar(carType: CarType): Car {
+class USAFactory : Factory {
+    override fun buildCar(carType: CarType): Car {
         return when (carType) {
-            CarType.MINI -> MiniCar(MadeInCountry.USA)
-            CarType.LUXURY -> LuxuryCar(MadeInCountry.USA)
+            CarType.MANUAL -> ManualCar(Country.USA)
+            CarType.AUTOMATIC -> AutomaticCar(Country.USA)
+        }
+    }
+
+    override fun buildTrain(trainType: TrainType): Train {
+        return when (trainType) {
+            TrainType.GAS -> GasTrain(Country.USA)
+            TrainType.ELECTRIC -> ElectricTrain(Country.USA)
         }
     }
 }
 
-class CarFactory {
-    fun buildCar(country: MadeInCountry, carType: CarType): Car {
+interface ICountryFactory {
+    fun getCountryFactory(country: Country): Factory
+}
+
+class CountryFactory : ICountryFactory {
+    override fun getCountryFactory(country: Country): Factory {
         return when (country) {
-            MadeInCountry.EGYPT -> EgyptCarFactory().buildCar(carType)
-            MadeInCountry.USA -> USACarFactory().buildCar(carType)
+            Country.EGYPT -> EgyptFactory()
+            Country.USA -> USAFactory()
         }
     }
 }
 
-fun main(args: Array<String>) {
-    val car = CarFactory()
-        .buildCar(MadeInCountry.EGYPT, CarType.LUXURY)
-    println("Made in:${car.madeInCountry().value} Type:${car.carType().value}")
-    // it prints Made in:EGYPT Type:LUXURY
+//country, carType and trainType should be dynamic from backend or user input as it could be created or changed at runtime
+fun main() {
+    val countryFactory: ICountryFactory = CountryFactory()
+    val factory = countryFactory.getCountryFactory(Country.EGYPT)
+    val car = factory.buildCar(CarType.AUTOMATIC)
+    val train = factory.buildTrain(TrainType.ELECTRIC)
+    car.build()
+    train.build()
 }

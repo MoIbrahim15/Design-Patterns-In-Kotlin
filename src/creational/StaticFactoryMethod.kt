@@ -1,13 +1,15 @@
 package creational
 
-fun main(args : Array<String>) {
-    println(Numbers.valueOf("123"))
-}
-
+//Static factory method is simply a static method that returns an instance of a class.
+///Usually this method is inside a particular class.
 class Numbers {
     companion object Parser {
-        fun valueOf(number: String) : Long {
-            return number.toLong()
+        fun valueOf(number: Long): String {
+            return number.toString()
         }
     }
+}
+
+fun main() {
+    println(Numbers.valueOf(123))
 }

@@ -1,5 +1,7 @@
 package creational.builder
 
+//Builder is a Creational design patterns, simplifies object creation in a very clean and readable way.
+//encapsulates the construction of a product and allow it to be constructed in steps.
 class Dialog private constructor(
         private val _title: String?,
         private val _description: String?,
@@ -23,17 +25,22 @@ class Dialog private constructor(
         println("Title is $_title")
         println("Description is $_description")
         println("Button value is $_buttonValue")
+    }
+
+    fun click() {
         _buttonAction?.invoke()
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
 
-    val dialog = Dialog.Builder()
-            .title("Thanks")
-            .description("Your action is being processed")
-            .buttonValue("Ok")
-            .buttonAction { println("Button clicked") }
-            .build()
+    val dialog = Dialog.Builder().apply {
+        title("Thanks")
+        description("Your action is being processed")
+        buttonValue("Ok")
+        buttonAction { println("Button clicked") }
+    }.build()
+
     dialog.show()
+    dialog.click()
 }
